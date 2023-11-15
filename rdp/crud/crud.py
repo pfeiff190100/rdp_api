@@ -95,7 +95,7 @@ class Crud:
             return session.scalars(stmt).one()
 
     def get_values(
-        self, value_type_id: int = None, start: int = None, end: int = None, lower_value: float = None, upper_value: float = None
+        self, value_type_id: int = None, start: int = None, end: int = None
     ) -> List[Value]:
         """Get Values from database.
 
@@ -117,9 +117,5 @@ class Crud:
                 stmt = stmt.where(Value.time >= start)
             if end is not None:
                 stmt = stmt.where(Value.time <= end)
-            if lower_value is not None:
-                stmt = stmt.where(Value.value >= lower_value)
-            if upper_value is not None:
-                stmt = stmt.where(Value.value <= upper_value)
             stmt = stmt.order_by(Value.time)
             return session.scalars(stmt).all()

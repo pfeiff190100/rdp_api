@@ -11,6 +11,19 @@ class Base(DeclarativeBase):
     pass
 
 
+class Device(Base):
+    __tablename__ = "device"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    device_name: Mapped[str]
+    device_description: Mapped[str]
+
+    values: Mapped[List["Value"]] = relationship(
+        back_populates="device", cascade="all, delete-orphan"
+    )
+
+    def __repr__(self) -> str:
+        return f"Device(id={self.id!r}, name={self.device_name}), description={self.device_description})"
+
 class ValueType(Base):
     __tablename__ = "value_type"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -24,15 +37,16 @@ class ValueType(Base):
     def __repr__(self) -> str:
         return f"ValueType(id={self.id!r}, value_type={self.type_name})"
 
-
 class Value(Base):
     __tablename__ = "value"
     id: Mapped[int] = mapped_column(primary_key=True)
     time: Mapped[int] = mapped_column()
     value: Mapped[float] = mapped_column()
     value_type_id: Mapped[int] = mapped_column(ForeignKey("value_type.id"))
+    device_id: Mapped[int] = mapped_column(ForeignKey("device.id"))
 
     value_type: Mapped["ValueType"] = relationship(back_populates="values")
+    device: Mapped["Device"] = relationship(back_populates="values")
 
     __table_args__ = (
         UniqueConstraint("time", "value_type_id", name="value integrity"),

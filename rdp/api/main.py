@@ -49,6 +49,50 @@ def read_type(id: int) -> ApiTypes.ValueType:
         raise HTTPException(status_code=404, detail="Item not found") 
     return value_type 
 
+@app.get("/device/{id}/")
+def read_device(id: int) -> ApiTypes.DeviceId:
+    """returns an explicit device identified by id
+
+    Args:
+        id (int): primary key of the desired value type
+
+    Raises:
+        HTTPException: Thrown if a value type with the given id cannot be accessed
+
+    Returns:
+        ApiTypes.ValueType: the desired value type 
+    """
+    global crud
+    try:
+         return crud.get_device(id)
+    except crud.NoResultFound:
+        raise HTTPException(status_code=404, detail="Item not found") 
+    return value_type 
+
+@app.get("/devicevalues/{id}/")
+def read_device_values(id: int) -> List[ApiTypes.ValueNoID]:
+    """Implements the get of all Devices
+
+    Returns:
+        List[ApiTypes.ValueNoID]: list of values of the Device. 
+    """    
+    global crud
+    try:
+        return crud.get_device_values(id)
+    except crud.NoResultFound:
+        raise HTTPException(status_code=404, detail="Item not found") 
+    return value_type 
+
+@app.get("/devices/")
+def read_devices() -> List[ApiTypes.DeviceId]:
+    """Implements the get of all Devices
+
+    Returns:
+        List[ApiTypes.DeviceId]: list of available Devices. 
+    """    
+    global crud
+    return crud.get_devices()
+
 @app.put("/type/{id}/")
 def put_type(id, value_type: ApiTypes.ValueTypeNoID) -> ApiTypes.ValueType:
     """PUT request to a special valuetype. This api call is used to change a value type object.
@@ -67,6 +111,27 @@ def put_type(id, value_type: ApiTypes.ValueTypeNoID) -> ApiTypes.ValueType:
     try:
         crud.add_or_update_value_type(id, value_type_name=value_type.type_name, value_type_unit=value_type.type_unit)
         return read_type(id)
+    except crud.NoResultFound:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+@app.post("/device/")
+def put_device(device_name, device_description) -> ApiTypes.DeviceId:
+    """PUT request to a Device. This api call is used to change a Device object.
+
+    Args:
+        id (int): primary key of the requested value type
+        value_type (ApiTypes.Device): json object representing the new state of the value type. 
+
+    Raises:
+        HTTPException: Thrown if a value type with the given id cannot be accessed 
+
+    Returns:
+        ApiTypes.Device: the requested value type after persisted in the database. 
+    """
+    global crud
+    try:
+        id = crud.add_or_update_device(device_name=device_name, device_description=device_description)
+        return read_device(id)
     except crud.NoResultFound:
         raise HTTPException(status_code=404, detail="Item not found")
 

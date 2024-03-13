@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session
 
-from .model import Base, Value, ValueType
+from .model import Base, Value, ValueType, Device
 
 
 class Crud:
@@ -51,18 +51,19 @@ class Crud:
             session.commit()
             return db_type
 
-    def add_value(self, value_time: int, value_type: int, value_value: float) -> None:
+    def add_value(self, value_time: int, value_type: int, value_value: float, device_id: int) -> None:
         """Add a measurement point to the database.
 
         Args:
             value_time (int): unix time stamp of the value.
             value_type (int): Valuetype id of the given value. 
             value_value (float): The measurement value as float.
+            device_id (int): Device id of the given value.
         """        
         with Session(self._engine) as session:
             stmt = select(ValueType).where(ValueType.id == value_type)
             db_type = self.add_or_update_value_type(value_type)
-            db_value = Value(time=value_time, value=value_value, value_type=db_type)
+            db_value = Value(time=value_time, value=value_value, value_type=db_type, device_id=device_id)
 
             session.add_all([db_type, db_value])
             try:
@@ -70,6 +71,31 @@ class Crud:
             except IntegrityError:
                 logging.error("Integrity")
                 raise
+    
+    def add_or_update_device(self, device_name: str, device_description: str, device_id=None,) -> Device:
+        """update or add a device
+
+        Args:
+            device_id (int, optional): Device id to be modified (if None a new ValueType is added), Default to None.
+            device_name (str, optional): Device name wich should be set or updated. Defaults to None.
+            device_description (str, optional): Device description wich should be set or updated. Defaults to None.
+
+        Returns:
+            _type_: _description_
+        """
+        with Session(self._engine) as session:
+            stmt = select(Device).where(Device.id == device_id)
+            db_type = session.scalars(stmt).first()
+            if db_type is None:
+                db_type = Device(device_name=device_name, device_description=device_description)
+            if device_name:
+                db_type.device_name = device_name
+            if device_description:
+                db_type.device_description = device_description
+            session.add(db_type)
+            session.commit()
+            
+            return db_type.id
 
     def get_value_types(self) -> List[ValueType]:
         """Get all configured value types
@@ -79,6 +105,16 @@ class Crud:
         """
         with Session(self._engine) as session:
             stmt = select(ValueType)
+            return session.scalars(stmt).all()
+
+    def get_devices(self) -> List[Device]:
+        """Get all configured devices
+
+        Returns:
+            List[ValueType]: List of ValueType objects. 
+        """
+        with Session(self._engine) as session:
+            stmt = select(Device)
             return session.scalars(stmt).all()
 
     def get_value_type(self, value_type_id: int) -> ValueType:
@@ -93,6 +129,32 @@ class Crud:
         with Session(self._engine) as session:
             stmt = select(ValueType).where(ValueType.id == value_type_id)
             return session.scalars(stmt).one()
+
+    def get_device(self, device_id: int) -> Device:
+        """Get a special Device
+
+        Args:
+            device (int): the primary key of the Device
+
+        Returns:
+            Device: The Device object
+        """
+        with Session(self._engine) as session:
+            stmt = select(Device).where(Device.id == device_id)
+            return session.scalars(stmt).one()
+
+    def get_device_values(self, device_id: int) -> List[Value]:
+        """Get all values from a Device
+
+        Args:
+            device (int): the primary key of the Device
+
+        Returns:
+            ValueType: The ValueType object
+        """
+        with Session(self._engine) as session:
+            stmt = select(Value).where(Value.device_id == device_id)
+            return session.scalars(stmt).all()
 
     def get_values(
         self, value_type_id: int = None, start: int = None, end: int = None

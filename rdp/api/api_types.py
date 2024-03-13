@@ -10,9 +10,17 @@ class ValueType(ValueTypeNoID):
 class ValueNoID(BaseModel):
     value_type_id: int
     time: int
-    value: float 
+    value: float
+    device_id: int 
 
 class Value(ValueNoID):
+    id: int
+
+class DeviceNoId(BaseModel):
+    device_name: str
+    device_description: str
+
+class DeviceId(DeviceNoId):
     id: int
 
 class ApiDescription(BaseModel):

@@ -180,7 +180,4 @@ class Crud:
             if end is not None:
                 stmt = stmt.where(Value.time <= end)
             stmt = stmt.order_by(Value.time)
-            logging.error(start)
-            logging.error(stmt)
-
             return session.scalars(stmt).all()

@@ -50,7 +50,6 @@ class Reader:
                 value = 0.0
                 value = struct.unpack("f", test[-4::])
                 random_device = random.choice(self._crud.get_devices()).id
-                random_location = random.choice(self._crud.get_location()).id
                 logger.debug(
                     "Read one time: %d type :%d and value %f",
                     value_time,

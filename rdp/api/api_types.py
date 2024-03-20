@@ -19,8 +19,16 @@ class Value(ValueNoID):
 class DeviceNoId(BaseModel):
     device_name: str
     device_description: str
+    location_id: int
 
 class DeviceId(DeviceNoId):
+    id: int
+
+class LocationNoId(BaseModel):
+    location_name: str
+    location_description: str
+
+class LocationId(LocationNoId):
     id: int
 
 class ApiDescription(BaseModel):

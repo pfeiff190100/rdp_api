@@ -16,13 +16,24 @@ class Device(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     device_name: Mapped[str]
     device_description: Mapped[str]
+    location_id: Mapped[int] = mapped_column(ForeignKey("location.id"))
 
     values: Mapped[List["Value"]] = relationship(
         back_populates="device", cascade="all, delete-orphan"
     )
+    location: Mapped["Location"] = relationship("Location")
 
     def __repr__(self) -> str:
         return f"Device(id={self.id!r}, name={self.device_name}), description={self.device_description})"
+
+class Location(Base):
+    __tablename__ = "location"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    location_name: Mapped[str]
+    location_description: Mapped[str]
+
+    def __repr__(self) -> str:
+        return f"Device(id={self.id!r}, name={self.location_name}), description={self.location_description})"
 
 class ValueType(Base):
     __tablename__ = "value_type"

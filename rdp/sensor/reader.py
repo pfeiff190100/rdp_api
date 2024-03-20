@@ -16,9 +16,14 @@ class Reader:
         self._thread: threading.Thread = None
 
     def start(self) -> None:
-        self._crud.add_or_update_device("Device 1", "First Device", "1")
-        self._crud.add_or_update_device("Device 2", "Second Device", "2")
-        self._crud.add_or_update_device("Device 3", "Third Device", "3")
+        self._crud.add_or_update_location("Location 1", "First Location", "1")
+        self._crud.add_or_update_location("Location 2", "Second Location", "2")
+        self._crud.add_or_update_location("Location 3", "Third Location", "3")
+
+        self._crud.add_or_update_device("Device 1", "First Device", "1", "1")
+        self._crud.add_or_update_device("Device 2", "Second Device", "2", "2")
+        self._crud.add_or_update_device("Device 3", "Third Device", "2", "3")
+        self._crud.add_or_update_device("Device 4", "Fourth Device", "3", "4")
         self._thread = threading.Thread(target=self._run)
         self._thread.start()
 
@@ -45,6 +50,7 @@ class Reader:
                 value = 0.0
                 value = struct.unpack("f", test[-4::])
                 random_device = random.choice(self._crud.get_devices()).id
+                random_location = random.choice(self._crud.get_location()).id
                 logger.debug(
                     "Read one time: %d type :%d and value %f",
                     value_time,
